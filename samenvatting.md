@@ -3,7 +3,7 @@
 | :---  |
 | [SRWE](#srwe)
 | 14.[Routing Concepts](#module-14-routing-concepts)    |
-| 15.[Ip Static Routing]()  |
+| 15.[Ip Static Routing](#module-15-ip-static-routing)  |
 | 16.[Troubleshoot Static and Default Routes]() |
 | [ENSA]()  |
 | 1.[Single-Area OSPFv2 Concepts]() |
@@ -204,3 +204,34 @@
   - de routing tabel bevat de single destination network, maar heeft meerde uitgang interfaces
   - als het correct geconfigueerd is, load balancing kan effectiviteit en performantie verbeteren van het netwerk
   - equal cost load balancing wordt automatisch geïmplementeerd door dynamic routing protocol. Het wordt aangezet met static routes wanneer er meerdere static routes naar hetzelfde netwerk zijn
+
+# Module 15: IP Static Routing
+## 15.1 Static Routes
+### 15.1.1 Types of Static Routes
+- Static routes worden vaak geïmplementeerd op een netwerk, dit is zo zelfs als er een dynamic routing protocol geconfigueerd is
+- static routes kunnen geconfigueerd worden voor IPv4 of IPv6. Beide protocollen supporten de volgende types van static routes:
+  - standard static route
+  - default static route
+  - floating static route
+  - summary static route
+
+### 15.1.2 Next-Hop Options
+- Wanneer een static route geconfigueerd wordt, kan de next hop geïdentificeerd worden door een IP adres, uitganginterface of beide.
+- Hoe de bestemming is gespecificeerd, maakt 1 van de volgende types van static routes:
+  - **Next-Hop Route**: alleen een next-hop ip adres is meegegeven
+  - **Directly connected static route**: alleen de uitgangsinterface
+  - **fully specified static route**: beide
+
+### 15.1.3 IPv4 Static Route Command
+- de IPv4 static routes worden geconfigueerd door het globale commando:
+  - `ip route <network-address> <subnet-mask>`
+
+### 15.1.4 IPv6 Static Route Command
+- IPv6 static routes worden geconfigueerd door het globale commando:
+  - `ipv6 route <ipv6-prefix/prefix-length>`
+
+### 15.1.5 Dual-Stack Topology
+
+
+## 15.2 Configure IP Static Routes
+### 15.2.1 IPv4 Next-Hop Static Route
