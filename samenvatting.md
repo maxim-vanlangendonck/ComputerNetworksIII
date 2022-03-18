@@ -235,3 +235,7 @@
 
 ## 15.2 Configure IP Static Routes
 ### 15.2.1 IPv4 Next-Hop Static Route
+
+## 15.3 Configure IP Default Static Routes
+### 15.3.1 Default Static Route
+- een standaard route is een statische route dat alle pakketten matcht
