@@ -4,11 +4,13 @@
 | [SRWE](#srwe)
 | 14.[Routing Concepts](#module-14-routing-concepts)    |
 | 15.[Ip Static Routing](#module-15-ip-static-routing)  |
-| 16.[Troubleshoot Static and Default Routes]() |
+| 16.[Troubleshoot Static and Default Routes](#module-16-troubleshoot-static-and-default-routes) |
 | [ENSA]()  |
-| 1.[Single-Area OSPFv2 Concepts]() |
-| 2.[Single-Area OSPFv2 Configuration]()    |
-| 3.[Network Security Concepts]()   |
+| 1.[Single-Area OSPFv2 Concepts](#module-1-single-area-ospfv2-concepts) |
+| 2.[Single-Area OSPFv2 Configuration](#module-2-single-area-ospfv2-configuration)    |
+| 4.[ACL Concepts](#module-4-acl-concepts) |
+| 5.[ACL for IPv4 Configuration](#module-5-acl-for-ipv4-configuration) |
+| 6.[NAT for IPv4](#module-6-nat-for-ipv4) |
 # SRWE
 # Module 14: Routing Concepts
 ## 14.1 Path Determination
@@ -239,3 +241,110 @@
 ## 15.3 Configure IP Default Static Routes
 ### 15.3.1 Default Static Route
 - een standaard route is een statische route dat alle pakketten matcht
+
+# Module 16: Troubleshoot Static and Default Routes
+
+
+# ENSA
+# Module 1: Single-Area OSPFv2 Concepts
+## 1.1 OSPF Features and Characteristics
+### 1.1.1 Introduction to OSPF
+- OSPF is een link-state routing protocol dat gemaakt is als alternatief voor de afstand vector Routing Information Protocol (RIP).
+- OSPF heeft grote voordelen in vergelijking met RIP, het heeft snellere convergentie en het schaalt beter bij het vergroten van het netwerk
+- OSPF is een link-state routing protocol dat het concept van area's gebruikt. Een netwerk administrator kan een routing domein onderverdelen in distinct area's dat helpt bij het controleren van de routing update traffic
+- een link is een interface op een router, een netwerk segment dat 2 routers connecteert met elkaar, of een stub netwerk zoals een Ethernet LAN dat geconnecteerd is met 1 router
+- de informatie over de status van de link staat bekend als de link-state. Alle link-state informatie bestaat uit de netwerk prefix, prefix lengte, en kost
+
+### 1.1.2 Onderdelen van OSPF
+- alle routing protocollen delen dezelfde onderdelen. Zij gebruiken routing procotol berichten om routing informatie te delen. De berichten helpt het opbouwen van data structuren
+- Routers die OSPF gebruiken, wisselen berichten uit om de routing informatie te verzamelen door gebruik te maken van 5 types van pakketten:
+  - hello packet
+  - database description packet
+  - link-state request packet
+  - link-state update packet
+  - link-state acknowledgement packet
+- Deze pakketten worden gebruikt om buurrouters te identificeren, om de routing informatie te verzamelen en om de routing informatie te versturen.
+
+![components of OSPF](img/componentsOfOSPF.png)
+
+- De router maakt een topologie tabel, door gebruik te maken van de berekingen gebaseerd op Dijkstra Shortest Path first Algorithm (SPF). De SPF algoritme is gebaseerd op de cummulatieve kost om de bestemming te bereiken
+- Het SPF algoritme maakt een SPF tree door een router aan de root van de tree te zetten en te berekenen de kost van de root tot de bestemming. De SPF tree wordt dan gebruikt om de beste routes te berekenen. OSPF plaats de beste routes in de forwarding database, die gebruikt worden om de routing tabel aan te maken
+
+### 1.1.3 Link-state Operation
+- om routing informatie te behouden, OSPF router compleet een generieke link-state routing proces om een staat van convergentie te bereiken.
+- De volgende link-state routing stappen worden gecompleet door een router
+  1. Breng buren in de buurt
+  2. link-state advertisements uitwisselen
+  3. Bouw de linkstatusdatabase
+  4. Voer het SPF-algoritme uit
+  5. Kies de beste route
+
+### 1.1.4 Single-Area and Multi-Area OSPF
+- om een OSPF efficiënter en schaalbaarder te maken, ondersteunt OSPF een hierarchische routing door gebruik te maken van area's.
+- een OSPF area is een groep van routers dat dezelfde link-state informatie deelt in hun LSDB.
+- OSPF kan op 2 manieren geïmplementeerd worden:
+  - **Single-Area OSPF**: alle routers zijn in 1 area, best practice is om area 0 te gebruiken
+  - **Multi-Area OSPF**: OSPF wordt geïmplementeerd door gebruik te maken van meerdere area's, in een hiërarchische structuur. Alle areas moeten geconnecteerd worden met de backbone area (area 0). Routers interconnecteren 
+
+### 1.1.5 Multiarea OSPF
+- de hiërarchische topologie design opties met multiarea OSPF voordelen geven:
+  - **kleinere routing tabellen**: de tabellen zijn kleiner doordat er minder routing tabel entries zijn
+  - **verminderde link-state update overhead**
+  - **verminderde frequentie van SPF berekeningen**
+
+### 1.1.6 OSPFv3
+- OSPFv3 is een nieuwe versie van OSPF die gebruik maakt van IPv6
+- OSPFv3 heeft dezelfde functionaliteit als OSPFv2, maar maakt gebruik van IPv6 netwerk laag transport. 
+
+## 1.2 OSPF Packets
+### 1.2.1 Types of OSPF Packets
+![OSPF packet types](img/typesOfOSPFPakketten.png)
+
+### 1.2.2 Link-State Updates
+- LSUs worden ook gebruikt om OSPF routing updates te forwarden
+- een LSU pakket kan 11 verschillende types van OSPFv2 LSAs bevatten
+- LSU en LSA zijn vaak uitwisselbaar gebruikt, maar de correcte hiërachie is dat LSU pakketten LSA berichten bevatten. 
+
+### 1.2.3 Hello Packet
+- De OSPF Type 1 pakket is een Hello packet.
+- hello packet wordt gebruikt voor het volgende:
+  - OSPF buren ontdekken en buur adjacencies aan te maken
+  - het aankondigen van parameters op welke twee routers 
+  - het aanmaken van een Designated Router (DR) en Backup Designated Router (BDR) on multiacces netwerken zoals Ethernet. Point-to-point links zijn niet nodig voor DR of BDR
+
+## 1.3 OSPF Operation
+### 1.3.1 OSPF Operational States
+![OSPF Operational States](img/OSPFOperationalStatesv1.png)
+![OSPF Operational States](img/OSPFOperationalStatesv2.png)
+
+### 1.3.2 Establish Neighbor Adjacencies
+- om te bepalen of er een OSPF buur op de link is, the router stuurt een Hello pakket dat een router ID bevat. Het Hello pakket wordt verstuurd naar alle OSPF router
+- de OSPF Router ID wordt gebruikt om de OSPF proces uniek te identificeren op iedere router in een OSPF Area. Een router ID is een 32-bit nummer geformateerd zoals een IPv4-adres.
+- wanneer een buur OSPF-enabled router ontvangt een Hello pakket met een router ID dat niet in de lijst staat, dan wordt er een adjacency gemaakt met de routing waarvan het hello pakket kwam. 
+
+![OSPF Neighbor Adjacencies](img/OSPFNeighborAdjacencies.png)
+
+### 1.3.3 Synchronizing OSPF Databases
+- Na de Two-Way state, routers . Dit is een 3 stap process:
+  - **kies eerste router**: de router met de grootste router ID stuurt een DBD eerst.
+  - **wissel DBDs uit**: 
+  - **stuur een LSR**
+- als alle LSRs uitgewisseld zijn, routers worden als gesynchroniseerd en in full state gezien. Updates (LSUs) worden verstuurd: 
+  - wanneer er een verandern voorkomt
+  - iedere 30 minuten
+
+### 1.3.4 The Need for a DR
+- Multiacces netwerken kan 2 challenges maken voor OSPF door de flooding van LSAs:
+  - **het aanmaken van meerdere adjacencies**: een router kan meerdere adjacencies hebben met andere routers in de area
+  - **extensive flooding of LSAs** 
+
+### 1.3.5 LSA Flooding with a DR
+
+
+# Module 2: Single-Area OSPFv2 Configuration
+
+# Module 4: ACL Concepts
+
+# Module 5: ACLs for IPv4 Configuration
+
+# Module 6: NAT for IPv4
