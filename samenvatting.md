@@ -336,13 +336,102 @@
 ### 1.3.4 The Need for a DR
 - Multiacces netwerken kan 2 challenges maken voor OSPF door de flooding van LSAs:
   - **het aanmaken van meerdere adjacencies**: een router kan meerdere adjacencies hebben met andere routers in de area
-  - **extensive flooding of LSAs** 
+  - **extensive flooding of LSAs**: link-state routers overvloeden hun LSAs iedere keer dat er OSPF geïnitialiseerd wordt, of wanneer er een verandering in topologie is
 
 ### 1.3.5 LSA Flooding with a DR
-
+- de verhoging van het aantal routers op een multiaccess netwerk, dit kan ook het aantal LSAs verhogen die uitgewisseld worden. 
+- als ieder router in een multiaccess netwerk 
+- op multiaccess netwerken, de OSPF selecteert een DR om de collectie- en distributiepunt voor alle LSAs die verzonden en ontvangen worden. Een BDR wordt ook aangeduid voor wanneer de DR faalt. Alle andere routers worden DROTHERs. Een DROTHER is een router dat geen DR noch BDR is. 
 
 # Module 2: Single-Area OSPFv2 Configuration
+## 2.1 OSPF Router ID
+### 2.1.1 OSPF Reference Topology
+### 2.1.2 Router Configuration Mode for OSPF
+- door gebruik te maken van commando `router ospf <process-id>` wordt OSPFv2 geïnitialiseerd
 
+### 2.1.3 Router IDs
+- een OSPF router ID is een 32-bit nummer, voorgesteld als een IPv4-adres. Het wordt gebruikt om een OSPF router uniek te identificeren. 
+- iedere router heeft een router ID nodig om mee te doen in het OSPF domein. Het kan automatisch ingesteld worden door de router of door de administrator.
+### 2.1.4 Router ID Order of Precedence
+- cisco routers leid het router ID af gebaseerd op 1 van deze 3 criteria, in deze volgorde:
+  1. de Router ID is expliciet ingesteld via commando `router-id <router-id>`, dit is aanbevolen methode
+  2. de router kiest het hoogste IPv4 adres van een configureerde loopback interface
+  3. de router kiest het hoogste actieve IPv4, van een van zijn actieve interfaces. 
+
+![Order of Precedence](img/orderOfPrecedence.png)
+
+### 2.1.5 Configure a Loopback Interface as the Router ID
+### 2.1.6 Explicitly Configure the Router ID
+### 2.1.7 Modify a Router ID
+- achter dat een router een router ID geselecteerd heeft, laat een actieve OSPF router het niet toe om de Router ID aan te passen tot dat de router gereload is of het OSPF process gereset is.
+- het OSPF proces clearen is de aanbevolen methode om de Router ID te resetten
+
+## 2.2 Point-to-Point OSPF Networks
+### 2.2.1 The network Command Syntax
+- je kan de interfaces specifiëren die aan point-to-point netwerk behoren door het commando network te configureren. Je kan ook OSPF configureren op de interface met het `ip ospf` commando.
+- de basis syntax voor het 'network' commando:
+  - `network <network-address> <wildcard-mask> area <area-id>`
+- het `<network-address> <wildcard-mask>` syntax wordt gebruikt op OSPF aan te zetten op de interfaces
+- het `area <area-id>` syntax wordt gebruikt om de OSPF netwerk te specificeren op welke area het OSPF netwerk geplaatst moet worden.
+
+### 2.2.2 The Wilcard Mask
+- de wildcard mask is meestal het inverse van het subnet mask die geconfigueerd is op de interface
+- de gemakkelijkste methode om de wilcard mask te berekenen is door de network subnet mask te verminderen van 255.255.255.255
+
+### 2.2.3 Configure OSPF Using the network Command
+- in het routing configuration mode. Zijn er 2 manieren om
+
+### 2.2.4 Passive Interface
+- standaard, OSPF berichten worden verstuurd naar alle OSPF-enabled interfaces. Maar deze berichten moeten enkel maar verstuurd worden naar de interfaces dat geconnecteerd zijn aan andere OSPF-enabled routers
+- het versturen van deze berichten hebben een invloed op het LAN op deze 3 manieren:
+  - **inefficiënt gebruik van het bandbreedte**: het beschikbare bandbreedte wordt gebruikt voor het vesturen van onnodige berichten
+  - **inefficiënt gebruik van resources**: alle apparaten op het LAN moeten de berichten processen en dan het berichten verwijderen
+  - **verhoogd Security risk**: zonder de OSPF
+
+### 2.2.5 Configure Passive Interface
+- gebruikt het `passive-interface` commando om een interface te configureren als een passieve interface
+
+### 2.2.6 OSPF Point-to-Point Networks
+- 
+
+### 2.2.7 Loopbacks and Point-to-Point Networks
+
+## 2.3 Multiaccess OSPF Networks
+### 2.3.1 OSPF Network Types
+- een andere type dat gebruik maakt van het OSPF is het "multiaccess OSPF network"
+- in een multiaccess OSPF netwerk is uniek dat 1 router de controle heeft voor de distributie van LSAs
+- de router die de rol heeft, wordt vastgelegd door de netwerk administrator
+
+### 2.3.2 OSPF Designated Router
+- in een multiaccess netwerken, OSPF selecteert een DR en BDR. De DR is verantwoordelijk voor het verzameling en versturen van LSAs die verstuurt en ontvangen worden. De DR gebruikt de multicast IPv4-adres 224.0.0.5 die voor alle OSPF routers
+- een BDR wordt geselecteerd als de DR faalt. De BDR luister passief en onderhoud een relatie met alle routers. 
+- alle andere routers zijn DROTHERs (een router dat noch een DR is noch een BDR is). DROTHERs gebruikt een multiaccess adres 224.0.0.6 om OSPF pakketten te versturen naar de DR en de BDR
+
+### 2.3.3 OSPF Multiaccess Reference Topology
+### 2.3.4 Verify OSPF Router Roles
+### 2.3.5 Verify DR/BDR Adjacencies
+- om de OSPFv2 adjacencies te verifiëren, gebruikt het `show ip ospf neighbor` commando
+- de staat van de buren in een multiaccess netwerken is als volgt:
+  - **FULL/DROTHER**:
+  - **FULL/DR**:
+  - **FULL/BDR**:
+  - **2-WAY/DROTHER**:
+
+## 2.4 Modify Single-Area OSPFv2
+### 2.4.1 Cisco OSPF Cost Metric
+- routing protocollen gebruiken een metric die het beste pad vastlegt. OSPF gebruik kost als een metric, een lagere kost toont een beter pad
+- De Cisco-kosten van een interface zijn omgekeerd evenredig met de bandbreedte van de
+koppel. Daarom duidt een hogere bandbreedte op lagere kosten. De gebruikte formule
+om de OSPF-kosten te berekenen is:
+  - Cost = referentie bandbreedte / interface bandbreedte
+- de referentie bandbreedte is 10^8 (100,000,000), hiervoor is het de formule:
+  - Cost = 100,000,000 bps / interface bandbreedte in bps
+
+![Cisco OSPF Cost Metric](img/ciscoOSPFCostMetric.png)
+
+### 2.4.2 Adjust the Reference Bandwidth
+- de kost waarde moet een integer zijn. 
+- voor deze reden, alle interfaces die sneller zijn dan Fast Ethernet zullen dezelfde kost waarde hbebn van 1 als een Fast Ethernet interface
 # Module 4: ACL Concepts
 
 # Module 5: ACLs for IPv4 Configuration
