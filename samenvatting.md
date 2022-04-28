@@ -432,8 +432,227 @@ om de OSPF-kosten te berekenen is:
 ### 2.4.2 Adjust the Reference Bandwidth
 - de kost waarde moet een integer zijn. 
 - voor deze reden, alle interfaces die sneller zijn dan Fast Ethernet zullen dezelfde kost waarde hbebn van 1 als een Fast Ethernet interface
+- om OSPF te assisteren bij het kiezen voor het correcte pad, de reference bandbreedte veranderd worden naar een hogere waarde om de netwerken te ondersteunen die links hebben die sneller zijn dan 100 Mbps
+- het veranderen van de referentie bandbreedte heeft geen invloed op de bandbreedte capaciteit op de link. Het heeft enkel invloed op de berekening die de metric bepaald
+- om de referentie bandbreedte te veranderen, gebruik commando `auto-cost reference-bandwidth <bandwidth>` van de router configuration
+  - dit commando kan gebruikt worden op elke router van het OSPF domein
+- een andere optie om de cost te veranderen op 1 specifieke interface, gebruik commando `ip ospf cost <cost>`
+- het is belangrijk om de configuratie op alle routers in het OSPF domein uit te voeren
+
+### 2.4.3 OSPF Accumulates Cost
+- de kost van een OSPF route is de geaccumuleerde waarde van 1 router naar het bestemmings netwerk
+
+### 2.4.4 Manually Set OSPF Cost Value
+- redenen om de cost value manueel in te stellen:
+  - de administrator wil de pad selectie beïnvloeden in de OSPF 
+  - connectie's naar apparaten van een andere verkoper, die een andere formule gebruiken voor het berekenen van de OSPF kost
+
+### 2.4.5 Test Failover to Backup Route
+- 
+
+### 2.4.6 Hello Pakcets Intervals
+- OSPFv2 Hello pakketten worden verstuurd naar het multicast adres 224.0.0.5 (alle OSPF routers) iedere 10 seconden. Dit is een default timer waarde op de multiacces en point-to-point netwerken
+- de Dead interval is de periode dat de router wacht om een hello pakket te ontvangen voordat hij zijn buur als down verklaart. Als de dead interval vervalt voordat de router een hello pakket ontvangt, dan zal OSPF de buur verwijderen uit de link-state database (LSDB). Cisco's default is 4x het hello interval = 40 seconden
+
+### 2.4.7 Verify Hello and Dead Intervals
+- de OSPF Hello en Dead interval kunnen aangepast worden per interface
+- de OSPF intervallen moeten matchen anders doet er geen neighbor adjacency voor.
+- om de intervallen te verifiëren, gebruik commando `show ip ospf interface`
+- gebruik het commando `show ip ospf neighbor` om de Dead time te zien aftellen van 40, standaard wordt deze waarde gerefreshed iedere 10 seconden
+
+### 2.4.8 Modify OSPFv2 Intervals
+- Het is misschien handig om de OSPF timers te veranderen zodat de router sneller een fout in het netwerk zien. Maar om dit verhoogd wel het netwerkverkeer
+- het veranderen van de intervallen gebeurt met volgende commando's
+  - `ip ospf hello-interval <seconds>`
+  - `ip ospf dead-interval <seconds>`
+- gebruikt volgende commando's om de intervallen te veranderen naar de standaard waarden:
+  - `no ip ospf hello-interval`
+  - `no ip ospf dead-interval`
+
+## 2.5 Default Route Propagation
+### 2.5.1 Propagate a Default Static Route in OSPFv2
+- om een Default route te propageren, moet de router als volgende geconfigueerd zijn:
+  - een default static route, door volgende commando `ip route 0.0.0.0 0.0.0.0 <next-hop-address | exit-intf>`
+  - de `default-information originate`commando, dit stelt de router in als de brond van de default route informatie
+
+## 2.6 Verify Single-Area OSPFv2
+### 2.6.1 Verify OSPF Neighbors
+
 # Module 4: ACL Concepts
+## 4.1 Purpose of ACLs
+### 4.1.1 What is an ACL?
+- een ACL is een serie van IOS commando's dat gebruikt worden om pakketten te filteren obv informatie die gevonden wordt in de pakket header
+- standaard, een router heeft geen ACL die geconfigueerd is.
+- Wanneer een ACL aan een interface wordt geplaatst, dan zal de router de extra taak van alle netwerk pakketten te evalueren wanneer deze door de interface gaan. 
+  - een ACL is een sequentiële lijst met verklaringen van toestemming of weigering, ook wel Access Control Entries (ACEs) genoemd.
+- deze zijn de taken die een router moeten hebben om het gebruik van ACLs toe te staan:
+  - het limiteren van netwerkverkeer om netwerkperformantie te verbeteren
+  - netwerkverkeer flow geven
+  - een basislevel aan netwerktoegang beveiliging
+  - netwerkverkeer filteren obv verkeertype
+  - host screenen om toegang te geven en verbieden van de netwerk services
+  - voorrang geven aan bepaalde classes van het netwerkverkeer
+
+### 4.1.2 Packet Filtering
+- pakket filtering controleert te toegang tot een netwerk door het analyseren van het inkomende en/of uitgaande pakketten of ze te discarden obv bepaalde criteria's
+- pakket filtering kan zowel op laag 3 als 4
+- Cisco router ondersteunen twee types van ACLs:
+  - **Standard ACLs**: ACLs filteren alleen laag 3, gebruik makend van het bron IPv4 adres
+  - **Extended ACLs**: ACLs filteren op Laag 3, gebruik makend van het bron als bestemmings IPv4 adres. Maar kunnen ook gefilterd worden op laag 4, door gebruik te maken van TCP, UDP poorten en de optionele protcol type informatie voor betere controle
+
+### 4.1.3 ACL Operation
+- ACLs definiëren en set aan regels dat verbeterde controle voor pakketten in binnen komen in de inbound interface, pakketten die door de router gaan en pakketten die via de outbound interface terug weggaan
+- ACLs kunnen ingesteld worden op inbound en outbound netwerkverkeer
+- 2 soorten ACLs:
+  - **Inbound ACL**: filtert pakketten voordat ze gerouteerd zijn naar de outbound interface. Een inbound ACL is efficiënt omdat het helpt de overhead van de routing lookup als het pakket gediscard wordt.
+  - **OUTbound ACL** filtert pakketten achter dat ze gerouteerd zijn
+- Wanneer een ACL is ingesteld op een interface, dan volgt het specifieke operating procedure. Deze procedure, wanneer een inbound standaar IPv4 ACL is geconfigureerd, is:
+  - de router haalt het bron IPv4-adres uit de pakket header.
+  - de router start aan het beginn van de ACL en vergelijkt het bron IPv4-adres met de ACE in een sequentiële volgorde
+  - wanneer er een match is, wordt de instruction uitgevoerd door de router. Oftewel toegang verlenen of verbieden. De overige ACEs in de ACL worden niet meer geanalyseerd
+  - als het bron IPv4 adres niet match met een ACE uit de ACL, wordt het pakket gediscard omdat
+
+## 4.2 Wildcard Masks in ACLs
+### 4.2.1 Wilcard Mask Overview
+- een wildcard mask is vergelijkbaar tot een subnetmask, deze twee gebruiken ANDing process om te identificiëren welke bit in een IPv4-adres matchen.
+- Maar bij wildcard mask, 0 = match en 1 = non-match
+- een IPv4 ACE gebruikt een 32-bit wildcard mask om vast te leggen welke bit van het adres moeten worden gecontroleerd
+- Wildcard mask gebruikt volgende regels:
+  - Wildcard mask bit 0: match de bitwaarde in het adres
+  - Wildcard mask bit 1: negeer de bitwaarde in het adres
+
+![Wildcard Mask Overview](img/wildcardMaskOverview.png)
+
+### 4.2.2 Wildcard Mask Types
+- Wildcard to Match a Host
+- Wildcard Mask to Match an IPv4 Subnet
+- Wildcard Mask to Match an IPv4 Address Range
+
+### 4.2.3 Wildcard Mask Calculation
+- een shortcut method om de wildcard mask te berekenen is 255.255.255.255 verminderen met de subnetmask
+
+### 4.2.4 Wildcard Mask Keywords
+- de Cisco IOS geeft 2 sleutelwoorden voor het gebruik van wildcard masking:
+  - **host**: een 0.0.0.0 mask
+  - **any**: een 255.255.255.255 mask
+
+## 4.3 Guidelines for ACL Creation
+### 4.3.1 Limited Number of ACLs per Interface
+- er zijn een beperkt aantal ACLs per router interface
+- een router interface kan maximaal:
+  - 1 outbound IPv4 ACL
+  - 1 inbound IPv4 ACL
+  - 1 outbound IPv6 ACL
+  - 1 inbound IPv6 ACL
+
+### 4.3.2 ACL Best Practices
+
+![ACL Best Practices](img/ACLBestPractices.png)
+
+## 4.4 Types of IPv4 ACLs
+### 4.4.1 Standard and Extended ACLs
+- Er zijn 2 types van IPv4 ACLs:
+  - **Standard ACLs**: deze geven pakketten toegang of verbied toegang gebaseerd op het bron IPv4-adres
+  - **Extended ACLs**: deze geven pakketten toegang of verbied toegang gebaseerd op zowel het bron als bestemmings IPv4-adres, protocol type, bron- en bestemmings TCP- en UDP poorten en meer. 
+
+### 4.4.2 Numbered and Named ACLs
+- **Numbered ACLs**
+![numbered ACLs](img/numberedACL.png)
+- **Named ACLs**:
+  - 
+
+### 4.4.3 Where to Place ACLs
+- elke ACL moet geplaatst worden op een plaats waar het het meeste invloed heeft op de efficiëntie.
+- Extended ACL moeten zo dicht mogelijk geplaatst worden op de bron van het verkeerd dat gefilterd moet worden
+- Standard ACLs moeten zo dicht mogelijk geplaatst worden aan de bestemming
+
+![Where to Place ACLs](img/whereToPlaceACLs.png)
+
+### 4.4.4 Standard ACL Placement Example
+### 4.4.5 Extended ACL Placement Example
 
 # Module 5: ACLs for IPv4 Configuration
+## 5.1 Configure Standard Standard IPv4 ACLs
+### 5.1.1 Create an ACL
+- alle access control lists (ACLs) moeten ingepland worden. Wanneer je een complexe ACL configueerd, kun je deze dingen doen:
+  - gebruik maken van een tekst-editor
+  - toevoegen van de IOS configuration commando's
+  - opmerkingen toevoegen
+  - copy paste de commando's op het apparaat
+  - altijd eerst de ACL blijven testen
 
+### 5.1.2 Numbered Standard IPv4 ACL Syntax
+- het gebruik van `access-list` commando
+![numbered ACL Syntax](img/numberedACLSyntax.png)
+- gebruik het commando `no access-list <access-list-number>` om een ACL te verwijderen
+
+### 5.1.3 Named Standard IPv4 ACL Syntax
+- om een named standard ACL aan te maken, gebruik het commando `ip access-list standard`
+  - ACL namen moeten alpha-numeriek, case senstive en uniek zijn.
+  - 
+
+### 5.1.4 Apply a Standard IPv4 ACL
+- achter dat een IPv4 ACL geconfigueerd is, moeten deze gelinkt worden aan een interface of feature.
+  - het `ip access-group` commando wordt gebruikt om een numbered of named standard IPv4 ACL toe te wijzen aan een interface
+  - om een ACL te verwijderen van een interface, `no ip access-group` in de interface configuration
+
+### 5.1.5 Numbered Standard ACL Example
+### 5.1.6 Named Standard ACL Example
+
+## 5.2 Modify IPv4 ACLs
+### 5.2.1 Two Methods to Modify an ACL
+- de twee manieren om een ACL te wijzigen zijn:
+  - gebruik maken van een tekst-editor
+  - door gebruik te maken van de sequence nummer
+
+### 5.2.2 Text Editor Method
+
+### 5.2.3 Sequence Number Method
+- een ACL ACE kan verwijderd of toegevoegd worden door gebruik te maken van de ACL Sequence nummer:
+  - gebruik het commando `ip access-list standard` om een ACL aan te passen
+  - statements kunnen niet overschreven worden, met het bestaande sequentie nummer. Eerst moet de bestaande statement verwijderd worden met volgend commando `no 10`
+
+### 5.2.4 Modify a Named ACL Example
+### 5.2.5 ACL Statistics
+- het commando `show access-lists` toont de statistieken voor iedere statement dat gematch heeft
+  - gebruik het commando `clear access-list coutners` om de statistieken te verwijderen
+
+## 5.3 Secure VTY Ports with a Standard IPv4 ACL
+### 5.3.1 The Access-class Command
+- een standaard ACL kan de remote administratieve toegang naar een apparaat beveiligen door de VTY lijnen als volgt te implementeren:
+  - maak een ACL om te identificeren welke administratieve host er toegestaan worden om de remote access
+  - apply de ACL op het inkomende verkeer op de vty lijnen door gebruik te maken van het `access-class` line commando
+
+### 5.3.2 Secure VTY Access Example
+### 5.3.3 Verify the VTY Port is Secured
+
+## 5.4 Configure Extended IPv4 ACLs
+### 5.4.1 Extended ACLs
+- Extended ACLs zorgen voor een grotere mate van controle. Ze kunnen filteren op bron adres, bestemmingsadres, protocol (IP, TCP, UDP, ICMP) en poort nummer
+- Extende ACLs kunnen als volgt gemaakt worden:
+  - **Numbered Extended ACL**: door gebruik te maken van het globale commando `access-list <access-list-number>`
+  - **Named Extended ACL**: door gebruik te maken van het commando `ip access-list extended <access-list-name>`
+
+### 5.4.2 Protcols and Ports
+-
+### 5.4.3 Protocols and Port Numbers Configuration Examples
+### 5.4.4 Apply a Numbered Extended IPv4 ACL
+
+### 5.4.5 TCP Established Extended ACL
+- TCP kan ook basis statefull firewall diensten aanbieden door gebruik te maken van de TCP established keyword
+  - de established sleutelwoorden enablen
+
+![TCP Established Extended ACL](img/TCPEstablishedExtendedACL.png)
+
+### 5.4.6 Named Extended IPv4 ACL Syntax
+- het commando `ip access-list extended <access-list-name>` wordt gebruikt om een named extended ACL aan te maken
+
+### 5.4.7 Named Extended IPv4 ACL Example
+### 5.4.8 Edit Extended ACLs
+- een extended ACL kan gewijzigd worden door gebruik te maken van een tekst-editor, wanneer er veel veranderd moeten worden. Maar kan ook als er maan 1 of 2 ACEs gewijzigd moeten worden, gedaan worden door gebruik te maken van de sequence nummer
+
+### 5.4.9 Another Extended IPv4 ACL Example
+### 5.4.10 Verify Extended ACLs
+- `show ip interface`
+- `show access-lists`
 # Module 6: NAT for IPv4
