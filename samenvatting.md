@@ -655,4 +655,95 @@ om de OSPF-kosten te berekenen is:
 ### 5.4.10 Verify Extended ACLs
 - `show ip interface`
 - `show access-lists`
+
 # Module 6: NAT for IPv4
+## 6.1 NAT Characteristics
+### 6.1.1 IPv4 Address Space
+- Netwerken worden geïmplementeerd door gebruik te maken van private IPv4 adressen
+- private IPv4 adressen kunnen niet gerouteerd worden over het internet en worden enkel maar gebruikt in organisatie om apparaten toe te laten om met elkaar lokaal te communiceren
+- om een apparaat met een privaat IPv4 adres toe te laten om te kunnen communiceren met andere apparaten, moet het private adres eerste vertaald worden naar een publiek adres.
+- Network Address Translation (NAT) laat de vertaling van private adressen naar publieken adressen toe.
+
+### 6.1.2 What is NAT?
+- het primaire gebruik van NAt is 
+- NAT laat netwerken toe om private IPv4 adressen intern te gebruiken en ze te vertalen naar een publiek adres wanneer dit nodig is
+- een NAT router functioneert meestal op de rand van een stub netwerk
+- wanneer een apparaat binnen een stub netwerk wil communiceren met een apparaat dat zich buiten het netwerk bevindt, wordt het pakket verstuurd naar de grensrouter die NAT processen uitvoert, deze vertaalt het intern privaat adres van het apparaat naar een publiek, extern, routbaar adres
+
+### 6.1.3 How NAT Works
+- PC1 wil communiceren met een webserver die zich buiten het intern netwerk bevindt, deze webserver heeft een publiek adres 209.165.201.1:
+  1. PC1 stuurt een pakket die geaddresseerd is naar de webserver
+  2. R2 ontvangt het pakket en leest het bron IPv4 adres uit en beslist of het moet vertaald worden.
+  3. R2 voegt mapping van het lokaal naar globaal adres toe aan de NAT tabel
+  4. R2 stuurt het pakket met het vertaalde bron adres naar de bestemming
+  5. de webserver reageert met een pakket die geaddresseerd is aan de inside global address van PC1 (209.165.200.226)
+  6. R2 ontvangt het pakket met het bestemmingsadres 209.165.200.226. R2 checkt in de NAT tabel en vindt een entry voor deze mapping. R2 gebruikt deze info en vertaalt de inside global adress (209.165.200.226) naar het inside global address (192.168.10.10) en stuurt het pakket door naar PC1
+
+![The working of NAT](img/howNATWorks.png)
+
+### 6.1.4 NAT Terminology
+- NAT heeft 4 types van adressen:
+  - Inside Global Address
+  - Inside Local Address
+  - Outside Global Address
+  - Outside Local Address
+- NAT terminologie wordt bekijken uit het perspectief van het apparaat met het vertaalde adres:
+  - inside address: het adres van het apparaat dat wordt vertaald door de NAT
+  - outside address: het adres van het bestemmingsapparaat
+  - local address: een adres dat voorkomt in het midden van het netwerk
+  - global address: een adres dat buiten het netwerk voorkomt
+
+## 6.2 Types of NAT
+### 6.2.1 Types of NAT
+- er zijn 3 types NAT:
+  - Static NAT
+  - Dynamic NAT
+  - Port Address Translation (PAT) of NAT overload
+
+### 6.2.2 Static NAT
+- static NAT maakt gebruik van 1-to-1 mapping van lokale en globale adressen, die geconfigueerd zijn door de netwerk administrator die constant blijven
+- een static NAT is nuttig voor een webserver of apparaten die een consiquent adres moeten hebben. 
+- het is ook handig voor apparaten die beschikbaar moeten zijn voor bepaald personeel wanneer ze offsite zijn, maar niet voor ieder publiek.
+
+### 6.2.3 Dynamic NAT
+- Dynamic NAT maakt gebruik van een pool van publieke adressen, een wijst ze aan met een first-come, first-served basis
+- wanneer een inside apparaat toegang aanvraagt om te kunnen communiceren met een outside netwerk, zal dynamic NAT een publiek IPv4 geven van de pool aan het apparaat
+- de andere adressen uit de pool blijven steeds beschikbaar voor gebruik
+
+### 6.2.4 Port Address Translation (PAT)
+- PAT ook wel NAT overload genoemd, maps verschillende private ipv4 adressen aan 1 publiek ipv4 adres
+- wanneer de NAT router een pakket ontvangt van een client, maakt hij gebruikt van de bronpoort nummer om te bepalen welk NAT translation ze moet gebruiken
+- PAT verzekert dat apparaten steeds een verschillend poort nummber gebruiken voor iedere sessie met een server om het internet
+
+### 6.2.5 Next Available Port
+
+![Next Available Port](img/NextAvailablePort.png)
+
+### 6.2.6 NAT and PAT Comparison
+- een overzicht over de verschillen tussen PAT en NAT:
+  - NAT: veranderd enkel maar het IPv4 adres
+  - PAT: veranderd zowel het IPv4 adres als de poort nummer
+
+![PAT and NAT comparison](img/PATandNATcomparison.png)
+
+## 6.3 NAT Advantages and Disadvantages
+### 6.3.1 Advantages of NAT
+- NAT geeft bepaalde voordelen:
+  - NAT behoudt het wettelijk geregistreerde adresseringsschema door de
+  privatisering van intranetten.
+  - NAT bewaart adressen door middel van multiplexing op poortniveau van de toepassing.
+  - NAT vergroot de flexibiliteit van aansluitingen op het openbare netwerk.
+  - NAT zorgt ervoor dat het bestaande privé IPv4-adresschema behouden blijft, terwijl:
+  gemakkelijke verandering naar een nieuw omroepschema.
+  - NAT verbergt de IPv4-adressen van gebruikers en andere apparaten
+
+### 6.3.2 Disadvantages of NAT
+- NAT heeft natuurlijk ook nadelen:
+  - NAT verhoogt delays.
+  - Geen end-to-end verbindingen mogelijk, dus:
+    - NAT bemoeilijkt het gebruik van tunnelingprotocollen, zoals IPsec.
+    - Services die de initiatie van TCP-verbindingen van het externe netwerk vereisen, of
+    stateless protocollen, zoals die met UDP, kunnen worden verstoord.
+
+## 6.4 Static NAT
+### Static NAT Scenario
