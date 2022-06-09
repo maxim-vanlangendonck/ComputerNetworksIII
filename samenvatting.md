@@ -21,12 +21,28 @@
 
 ### 14.1.3 Het beste pad is gelijk aan het langste match
 - Het beste pad is de langste match in de routing tabel
-- de routing tabel bevat de route entries d
+- De routeringstabel bevat route-items bestaande uit een prefix (netwerkadres) en
+voorvoegsel lengte. Voor een overeenkomst tussen het bestemmings-IP-adres van een pakket
+en een route in de routeringstabel, moet een minimum aantal uiterst linkse bits overeenkomen
+tussen het IP-adres van het pakket en de route in de routeringstabel. De
+prefixlengte van de route in de routetabel wordt gebruikt om het minimum te bepalen
+aantal uiterst linkse bits dat moet overeenkomen
+- de langste match is de route in de tabel dat het grootste aantal heel linkse matching bits heeft met het bestemmings IP adres van het pakket. De laagste match is altijd de voorkeursroute
+
+### 14.1.4 IPv4 Longest Match Example
+![IPv4 Longest Match](img/IPv4LongestMatch.png)
+
+### 14.1.5 IPv6 Longest Match Example
+![IPv6 Longest Match](img/IPv6LongestMatch.png)
 
 ### 14.1.6 Het opmaken van de Routing Tabel
-- Direct geconnecteerde netwerken:
-- Remote netwerken
-- Standaard route
+- **Direct geconnecteerde netwerken**: wordt toegevoegd aan de routing tabel wanneer er een lokale interface ingesteld wordt met een IP adres en een subnet mask en wanneer deze actief is
+- **Remote netwerken**: Netwerken dat niet direct verbonden is met de router. De router leren over het remote netwerken op 2 manieren:
+  - **Static Routes**: wordt manueel geconfigueerd en toegevoegd aan de routing tabel
+  - **Dynamische Routing Protocols**: toegevoegd aan de routing tabel door middel van routing protocollen
+- **Standaard route**: specificieert een next-hop router wanneer de routing tabel geen match geeft op het bestemming IP adres. De standaard route kan manueel ingesteld worden of geleerd worden door middel van een dynamische routing protocol. De standaard route wordt vaak gerefereerd als de gateway of last resort
+  - bestemming van een IPv4 default route: 0.0.0.0 0.0.0.0
+  - bestemming van een IPv6 default route: ::/0
 
 ![Het opmaken van de Routing Table](img/BuildingRoutingTable.png)
 
@@ -40,10 +56,12 @@
 - achter het beslissen van het beste pad, kan de router het volgende doen
   - Het pakket forwarden op een apparaat die direct geconnecteerd is het op netwerk
   - het pakket forwarden naar een Next-Hop Router
-  - Het pakket droppen - er is geen match in de Routing Tabel
+  - Het pakket droppen => er is geen match in de Routing Tabel
+
+![Packet Forwarding Decision Process](img/PacketForwardingDecisionProcess.png)
 
 ### 14.2.2 Packet Forwarding Mechanisms
-- de primaire verantwoordelijkheid van de pakket forwarding functie is het encapsuleren van pakketten in juist appro data link frame type voor de uitgaande interface
+- de primaire verantwoordelijkheid van de pakket forwarding functie is het encapsuleren van pakketten in juiste data link frame type voor de uitgaande interface
 - De Router ondersteunt de volgende 3 pakket forwarding mechanismen
   - Process switching
   - Fast switching
@@ -58,7 +76,8 @@
   - gebruikt een fast-switching cache om de next-hop informatie in op te slaan
   - wanneer een pakket arriveert op een interface, dan wordt het doorgestuurd naar de control plane waar de CPU zoekt voor een match in de fast-switching cache.
   - als het niet hier is, dan wordt het geprocess-switched
-![Fast Switching](img/FastSwitching.png)
+  
+  ![Fast Switching](img/FastSwitching.png)
 - **Cisco Express Forwarding (CEF)**:
   - het meeste recente en standaard Cisco IOS packet forwarding mechanisme
   - CEF maakt een Forwarding Information Base (FIB) en een aangrenzende tabel
@@ -67,29 +86,12 @@
   ![Cisco Express Forwarding CEF](img/CiscoExpressForwarding.png)
 
 ## 14.3 Basic Router Configuration Review
-### 14.3.1 Topologie
-### 14.3.2 Configuratie commando's
-![Configuratie commando's](img/RouterConfiguratieCommandos.png)
-### 14.3.3 Verificatie Commando's
-- `show ip interface brief`
-- `show running-config interface <interface-type number>`
-- `show interfaces`
-- `show ip interface`
-- `show ip route`
-- `ping`
+- zie commando boekje
 
-### 14.3.4 Filter commando output
-- filterting commando's kunnen gebruikt worden om bepaalde uitput te krijgen, hiervoor hebt je | pipe karakter nodig
-- bepaalde filter parameters
-  - section
-  - include
-  - exclude
-  - begin
 ## 14.4 IP Routing Table
 ### 14.4.1 Route Sources
-- een routing tabel bevat een lijst aan routes 
 - de bron van deze informatie komt van:
-  - Direct geconnecteerde netwerken
+  - direct geconnecteerde netwerken
   - statische routes
   - dynamische routing protocollen
 - de bron van iedere route in de tabel is geïdentificeerd met een code:
@@ -103,12 +105,12 @@
 - 3 routing table principes
   - iedere router maakt een beslissing alleen, gebaseerd op de informatie dat hij heeft in zijn eigen routing tabel
   - de informatie in een routing tabel van 1 router moet niet direct dezelfde zijn als de routing tabel van een andere router
-  - routing informatie over een pad 
+  - routing informatie over een pad biedt geen retourroute-informatie
 
 ### 14.4.3 Routing Table Entries
 1. **Route Source**: geeft weer hoe de route geleerd geweest is
 2. **bestemming netwerk (prefix en prefix lengte)**: geeft het adres weer van het remote netwerk
-3. **administratieve afstand**: geeft de betrouwbaarheid weer van de route bron. Hoe lager de waarde geeft de preferred route bron weer. deze is gebaseerd op welke routing protocol er gebruikt werd
+3. **administratieve afstand**: geeft de betrouwbaarheid weer van de route bron. Hoe lager de waarde geeft de preferred route bron weer. Deze is gebaseerd op welke routing protocol er gebruikt werd
 4. **Metric**: geeft de waarde voor . De berekening is gebaseerd op de kost van een bepaalde route
 5. **Next-hop**: het ip adres voor de volgende router naar welk het pakket 
 6. **Route timestamp**: geeft de tijd weer sinds wanneer de route aangeleerd werd
@@ -161,7 +163,7 @@
   - Static routes worden het meest gebruikt in volgende scenario's
     - als een default route om pakketten te forwarden naar de ISP
     - voor routes buiten het routing domein en die niet aangeleerd zijn door dynamic routing protocol
-    - wanneer een netwerk admin een 
+    - wanneer een netwerkadministrator expliciet een pad wil definiëren voor een specifiek netwerk 
     - voor routing tussen stub netwerken
 - **Dynamic Routing**
   - Dynamic routing protocols worden geïmplementeerd in ieder type van netwerk dat bestaat uit 1 of meerdere routers
@@ -232,9 +234,6 @@
 - IPv6 static routes worden geconfigueerd door het globale commando:
   - `ipv6 route <ipv6-prefix/prefix-length>`
 
-### 15.1.5 Dual-Stack Topology
-
-
 ## 15.2 Configure IP Static Routes
 ### 15.2.1 IPv4 Next-Hop Static Route
 
@@ -242,9 +241,56 @@
 ### 15.3.1 Default Static Route
 - een standaard route is een statische route dat alle pakketten matcht
 
+## 15.4 Configure Floating Static Routes
+### 15.4.1 Floating Static Routes
+- zijn statische routes die gebruikt wordt als een backup pad voor een primaire fo dynamische route. De floating static route wordt enkel gebruikt wanneer de primaire route niet beschikbaar is.
+- om dit te hebben, wordt de floating static route geconfigueerd met een hogere administratieve afstand dan de primaire route. 
+- standaard, heeft een statische route een administratieve afstand van 1
+
+### 15.4.2 Configure IPv4 and IPv6 Floating Static Routes
+- commando's
+  - ipv4
+    - `ip route 0.0.0.0 0.0.0.0 <ip-adres>`
+    - `ip route 0.0.0.0 0.0.0.0 <ip-adres> 5`
+  - ipv6
+    - `ipv6 route ::/0 <ipv6-adres>`
+    - `ipv6 route ::/0 <ipv6-adres> 5`
+
+### 15.4.3 Test the Floating Static Routes
+- `show ip route`
+- `show ipv6 route`
+
+## 15.5 Configure Static Host Routes
+### 15.5.1 Host Routes
+- een host route voor een IPv4 adres met een 32-bit mask, of een ipv6-adres met een 128-bit mask. 
+- 3 manieren hoe een host route kan toegevoegd worden aan de routing tabel
+  - automatisch geïnstalleerd wanneer een IP adres is geconfigueerd op de router
+  - geconfigueerd als een statische host route
+  - host route wordt gekregen door middel van andere methoden
+
+### 15.5.2 Automatically Installed Host Routes
+- Cisco IOS automatisch installeert een host route, aka local host route, wanneer een interface adres geconfigueerd wordt op de router. Een host route laat toe om efficienter packetten te processeren dat direct voor de router bestemd is, anders dan doormiddel van packet forwarding
+- dit is een toevoeging tot de connected route
+
+### 15.5.3 Static Host Routes
+
+
 # Module 16: Troubleshoot Static and Default Routes
+## 16.1 Packet Processing with Static Routes
+### 16.1.1 Static Routes and Packet Forwarding
+- zie slides
+## 16.2 Troubleshoot IPv4 Static and Default Route Configuration
+### 16.2.1 Network Changes
+- een netwerk kan falen door verschillende redenen:
+  - een interface die faalt
+  - een ISP die een connectie dropt
+  - links kunnen overgesatureerd worden
+  - een admin kan een verkeerde configuratie krijgen
+- de administrator is verantwoordelijke voor het vaststellen en het oplossen van deze problemen
+- om efficiënt de problemen te vinden en op te lossen
 
-
+### 16.2.2 Common Troubleshooting Commands
+![Common Troubleshooting Commands](img/commonTroubleshootingCommands.png)
 # ENSA
 # Module 1: Single-Area OSPFv2 Concepts
 ## 1.1 OSPF Features and Characteristics
