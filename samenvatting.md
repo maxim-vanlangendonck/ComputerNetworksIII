@@ -296,55 +296,60 @@ aantal uiterst linkse bits dat moet overeenkomen
 # Module 1: Single-Area OSPFv2 Concepts
 ## 1.1 OSPF Features and Characteristics
 ### 1.1.1 Introduction to OSPF
-- OSPF is een link-state routing protocol dat gemaakt is als alternatief voor de afstand vector Routing Information Protocol (RIP).
+- OSPF (Open Shortest Path First) is een link-state routing protocol dat gemaakt is als alternatief voor de afstand vector Routing Information Protocol (RIP).
 - OSPF heeft grote voordelen in vergelijking met RIP, het heeft snellere convergentie en het schaalt beter bij het vergroten van het netwerk
 - OSPF is een link-state routing protocol dat het concept van area's gebruikt. Een netwerk administrator kan een routing domein onderverdelen in distinct area's dat helpt bij het controleren van de routing update traffic
 - een link is een interface op een router, een netwerk segment dat 2 routers connecteert met elkaar, of een stub netwerk zoals een Ethernet LAN dat geconnecteerd is met 1 router
 - de informatie over de status van de link staat bekend als de link-state. Alle link-state informatie bestaat uit de netwerk prefix, prefix lengte, en kost
 
 ### 1.1.2 Onderdelen van OSPF
-- alle routing protocollen delen dezelfde onderdelen. Zij gebruiken routing procotol berichten om routing informatie te delen. De berichten helpt het opbouwen van data structuren
-- Routers die OSPF gebruiken, wisselen berichten uit om de routing informatie te verzamelen door gebruik te maken van 5 types van pakketten:
-  - hello packet
-  - database description packet
-  - link-state request packet
-  - link-state update packet
-  - link-state acknowledgement packet
-- Deze pakketten worden gebruikt om buurrouters te identificeren, om de routing informatie te verzamelen en om de routing informatie te versturen.
+- **Routing Protocol Messages**
+  - alle routing protocollen delen dezelfde onderdelen. Zij gebruiken routing procotol berichten om routing informatie te delen. De berichten helpt het opbouwen van data structuren
+  - Routers die OSPF gebruiken, wisselen berichten uit om de routing informatie te verzamelen door gebruik te maken van 5 types van pakketten:
+    - hello packet
+    - database description packet
+    - link-state request packet
+    - link-state update packet
+    - link-state acknowledgement packet
+  - Deze pakketten worden gebruikt om buurrouters te identificeren, om de routing informatie te verzamelen en om de routing informatie te versturen.
+- **Data Structures**
 
 ![components of OSPF](img/componentsOfOSPF.png)
 
-- De router maakt een topologie tabel, door gebruik te maken van de berekingen gebaseerd op Dijkstra Shortest Path first Algorithm (SPF). De SPF algoritme is gebaseerd op de cummulatieve kost om de bestemming te bereiken
-- Het SPF algoritme maakt een SPF tree door een router aan de root van de tree te zetten en te berekenen de kost van de root tot de bestemming. De SPF tree wordt dan gebruikt om de beste routes te berekenen. OSPF plaats de beste routes in de forwarding database, die gebruikt worden om de routing tabel aan te maken
+- **Algorithm**
+  - De router maakt een topologie tabel, door gebruik te maken van de berekingen gebaseerd op Dijkstra Shortest Path first Algorithm (SPF). De SPF algoritme is gebaseerd op de cummulatieve kost om de bestemming te bereiken
+  - Het SPF algoritme maakt een SPF tree door een router aan de root van de tree te zetten en te berekenen de kost van de root tot de bestemming. De SPF tree wordt dan gebruikt om de beste routes te berekenen. OSPF plaats de beste routes in de forwarding database, die gebruikt worden om de routing tabel aan te maken
 
 ### 1.1.3 Link-state Operation
 - om routing informatie te behouden, OSPF router compleet een generieke link-state routing proces om een staat van convergentie te bereiken.
 - De volgende link-state routing stappen worden gecompleet door een router
-  1. Breng buren in de buurt
-  2. link-state advertisements uitwisselen
-  3. Bouw de linkstatusdatabase
-  4. Voer het SPF-algoritme uit
-  5. Kies de beste route
+  1. Establish Neighbor Adjacencies
+  2. Exchange Link-State Advertisements
+  3. Build the Link State Database
+  4. Execute the SPF Algorithm
+  5. Choose the Best Route 
 
 ### 1.1.4 Single-Area and Multi-Area OSPF
 - om een OSPF efficiënter en schaalbaarder te maken, ondersteunt OSPF een hierarchische routing door gebruik te maken van area's.
-- een OSPF area is een groep van routers dat dezelfde link-state informatie deelt in hun LSDB.
+- een OSPF area is een groep van routers dat dezelfde link-state informatie deelt in hun LSDBs.
 - OSPF kan op 2 manieren geïmplementeerd worden:
   - **Single-Area OSPF**: alle routers zijn in 1 area, best practice is om area 0 te gebruiken
-  - **Multi-Area OSPF**: OSPF wordt geïmplementeerd door gebruik te maken van meerdere area's, in een hiërarchische structuur. Alle areas moeten geconnecteerd worden met de backbone area (area 0). Routers interconnecteren 
+  - **Multi-Area OSPF**: OSPF wordt geïmplementeerd door gebruik te maken van meerdere area's, in een hiërarchische structuur. Alle areas moeten geconnecteerd worden met de *backbone area (area 0)*. Routers interconnecteren met de areas refererend naar Area Border Routers (ABRs)
 
 ### 1.1.5 Multiarea OSPF
 - de hiërarchische topologie design opties met multiarea OSPF voordelen geven:
   - **kleinere routing tabellen**: de tabellen zijn kleiner doordat er minder routing tabel entries zijn
-  - **verminderde link-state update overhead**
-  - **verminderde frequentie van SPF berekeningen**
+  - **verminderde link-state update overhead**: het maken van multiarea OSPF met kleinere area's minimaliseert de processing en memory behoeftes.
+  - **verminderde frequentie van SPF berekeningen**: Multiarea OSPF lokaliseert de impact van een topologie verandering in een area.
 
 ### 1.1.6 OSPFv3
-- OSPFv3 is een nieuwe versie van OSPF die gebruik maakt van IPv6
+- **OSPFv3** is een nieuwe versie van OSPF die gebruik maakt van IPv6
 - OSPFv3 heeft dezelfde functionaliteit als OSPFv2, maar maakt gebruik van IPv6 netwerk laag transport. 
+- OSPFv heeft verschillende processen van zijn IPv4 counterpart. De processen en operatie's zijn bijna helemaal hetzelfde als in het IPv4 Routing Protocol, maar draaien onafhankelijk.
 
 ## 1.2 OSPF Packets
 ### 1.2.1 Types of OSPF Packets
+- 5 verschillende types of Link State Packets (LSPs) die gebruikt worden door OSPFv2. OSPFv3 gebruikt heeft gelijke packet types.
 ![OSPF packet types](img/typesOfOSPFPakketten.png)
 
 ### 1.2.2 Link-State Updates
@@ -358,6 +363,8 @@ aantal uiterst linkse bits dat moet overeenkomen
   - OSPF buren ontdekken en buur adjacencies aan te maken
   - het aankondigen van parameters op welke twee routers 
   - het aanmaken van een Designated Router (DR) en Backup Designated Router (BDR) on multiacces netwerken zoals Ethernet. Point-to-point links zijn niet nodig voor DR of BDR
+
+![Hello Packet](img/HelloPacket.png)
 
 ## 1.3 OSPF Operation
 ### 1.3.1 OSPF Operational States
@@ -374,8 +381,8 @@ aantal uiterst linkse bits dat moet overeenkomen
 ### 1.3.3 Synchronizing OSPF Databases
 - Na de Two-Way state, routers . Dit is een 3 stap process:
   - **kies eerste router**: de router met de grootste router ID stuurt een DBD eerst.
-  - **wissel DBDs uit**: 
-  - **stuur een LSR**
+  - **wissel DBDs uit**: zoveel dat er nodig zijn om de databank bij te vullen. De andere router moet iedere DBD bevestigen met een LSAck pakket
+  - **stuur een LSR**: iedere router vergelijkt de DBD info met de lokale LSDB. Als de DBD meer courante link informatie heeft, verandert de router in de loading state
 - als alle LSRs uitgewisseld zijn, routers worden als gesynchroniseerd en in full state gezien. Updates (LSUs) worden verstuurd: 
   - wanneer er een verandern voorkomt
   - iedere 30 minuten
@@ -385,9 +392,11 @@ aantal uiterst linkse bits dat moet overeenkomen
   - **het aanmaken van meerdere adjacencies**: een router kan meerdere adjacencies hebben met andere routers in de area
   - **extensive flooding of LSAs**: link-state routers overvloeden hun LSAs iedere keer dat er OSPF geïnitialiseerd wordt, of wanneer er een verandering in topologie is
 
+![The Need for a DR](img/NeedForDR.png)
+
 ### 1.3.5 LSA Flooding with a DR
 - de verhoging van het aantal routers op een multiaccess netwerk, dit kan ook het aantal LSAs verhogen die uitgewisseld worden. 
-- als ieder router in een multiaccess netwerk 
+- als ieder router in een multiaccess netwerk iedere ontvangen LSA moet bevestigen en flooden naar alle routers op hetzelfde multiaccess netwerk, dan zou het netwerkverkeerd zeer choatisch worden
 - op multiaccess netwerken, de OSPF selecteert een DR om de collectie- en distributiepunt voor alle LSAs die verzonden en ontvangen worden. Een BDR wordt ook aangeduid voor wanneer de DR faalt. Alle andere routers worden DROTHERs. Een DROTHER is een router dat geen DR noch BDR is. 
 
 # Module 2: Single-Area OSPFv2 Configuration
@@ -433,28 +442,32 @@ aantal uiterst linkse bits dat moet overeenkomen
 - het versturen van deze berichten hebben een invloed op het LAN op deze 3 manieren:
   - **inefficiënt gebruik van het bandbreedte**: het beschikbare bandbreedte wordt gebruikt voor het vesturen van onnodige berichten
   - **inefficiënt gebruik van resources**: alle apparaten op het LAN moeten de berichten processen en dan het berichten verwijderen
-  - **verhoogd Security risk**: zonder de OSPF
+  - **verhoogd Security risk**: zonder de OSPF bijkomende OSPF security configuraties, OSPF berichten kunnen onderschept worden met een packet sniffing software. Routing updates kunnen gemodificeerd worden en terug verstuurd worden naar de router. 
 
 ### 2.2.5 Configure Passive Interface
 - gebruikt het `passive-interface` commando om een interface te configureren als een passieve interface
 
 ### 2.2.6 OSPF Point-to-Point Networks
-- 
+- standaard, selecteert Cisco een DR en BDR op de Ethernet interfaces. Zelfs als er maar 1 apparaat op een link is. Je kan dit verifiëren met het commando `show ip ospf interface`
+- de DR/BDR selectie proces is onnodig, omdat er maar 2 routers op point-to-point netwerk zijn. 
 
 ### 2.2.7 Loopbacks and Point-to-Point Networks
+- gebruik maken van loopbacks om meerdere interfaces te hebben voor verschillende redenen. Standaard, is een loopback interface op /32 host routes ingesteld.
+- om een echt LAN te simuleren, de loopback interface kan geconfigueerd worden als een point-to-point netwerken om het volledige netwerk te adverteren.
 
 ## 2.3 Multiaccess OSPF Networks
 ### 2.3.1 OSPF Network Types
-- een andere type dat gebruik maakt van het OSPF is het "multiaccess OSPF network"
+- een andere type dat gebruik maakt van het OSPF is het *multiaccess OSPF network*
 - in een multiaccess OSPF netwerk is uniek dat 1 router de controle heeft voor de distributie van LSAs
 - de router die de rol heeft, wordt vastgelegd door de netwerk administrator
 
 ### 2.3.2 OSPF Designated Router
-- in een multiaccess netwerken, OSPF selecteert een DR en BDR. De DR is verantwoordelijk voor het verzameling en versturen van LSAs die verstuurt en ontvangen worden. De DR gebruikt de multicast IPv4-adres 224.0.0.5 die voor alle OSPF routers
+- in een multiaccess netwerken, OSPF selecteert een DR (Designated Router) en BDR (Backup Designated Router). De DR is verantwoordelijk voor het verzameling en versturen van LSAs die verstuurt en ontvangen worden. De DR gebruikt de multicast IPv4-adres 224.0.0.5 die voor alle OSPF routers
 - een BDR wordt geselecteerd als de DR faalt. De BDR luister passief en onderhoud een relatie met alle routers. 
 - alle andere routers zijn DROTHERs (een router dat noch een DR is noch een BDR is). DROTHERs gebruikt een multiaccess adres 224.0.0.6 om OSPF pakketten te versturen naar de DR en de BDR
 
 ### 2.3.3 OSPF Multiaccess Reference Topology
+- zie slides
 ### 2.3.4 Verify OSPF Router Roles
 ### 2.3.5 Verify DR/BDR Adjacencies
 - om de OSPFv2 adjacencies te verifiëren, gebruikt het `show ip ospf neighbor` commando
@@ -464,9 +477,32 @@ aantal uiterst linkse bits dat moet overeenkomen
   - **FULL/BDR**:
   - **2-WAY/DROTHER**:
 
+### 2.3.6 Default DR/BDR Election Process
+- de OSPF DR en BDR selectie is gebaseerd volgens volgend criteria, in deze sequentiële volgorde:
+  1. de routers in het netwerk selecteren de router met de hoogste interface prioriteit, als DR. De router met de twee hoogste interface prioriteit, wordt BDR.
+    - de prioriteit kan geconfigueerd worden met een nummer tussen 0 - 225
+    - als de interface prioriteit waarde op 0 gezet is, kan de interface niet geselecteerd worden als DR noch BDR
+    - de standaar prioriteit van een multiaccess broadcast interface is 1 (serieel => prioriteit = 0 default)
+  2. als de interface prioriteiten gelijk zijn, dan wordt de router met de hoogste router ID als DR geselecteerd. De router met de tweede hoogste router ID wordt BDR.
+     - het selectie proces neemt plaats wanneer de eerste router met een OSPF-enabled interface actief op het netwerk komt. als alle routers op het netwerk nog niet gedaan zijn met booten, is het mogelijk dat de router met een lagere router ID DR wordt.
+     - de toevoeging van een nieuwe router, start geen nieuw election process 
+
+### 2.3.7 DR Failure and Recovery
+- Wanneer er een DR geselecteerd is, blijft de DR totdat volgende gebeurtenissen gebeuren:
+  - de DR faalt
+  - het OSPF proces op de DR faalt of is gestopt
+  - de multiaccess interfae op de DR faalt of is uit
+- als de DR faalt, wordt de BDR automatisch gepromoveerd tot DR
+
+### 2.3.8 The ip ospf priority Command
+- als de interface prioriteiten gelijk zijn op alle routers, wordt de router met de hoogste router ID DR
+- in plaats van rekening houden met de router ID, is het beter de selectie te controleren door interface prioriteiten te zetten. Dit laat de router toe om de DR te zijn in 1 netwerk en een DROTHER te zijn in een ander
+- om de prioriteit van een interface te zetten, maak gebruik van het commando `ip ospf priority value`, waarbij de waarde tussen 0 en 255 ligt
+  - als de waarde 0 of 255 is wordt de router geen DR of BDR
+
 ## 2.4 Modify Single-Area OSPFv2
 ### 2.4.1 Cisco OSPF Cost Metric
-- routing protocollen gebruiken een metric die het beste pad vastlegt. OSPF gebruik kost als een metric, een lagere kost toont een beter pad
+- routing protocollen gebruiken een metric die het beste pad vastlegt. *OSPF gebruik kost als een metric*, een lagere kost toont een beter pad
 - De Cisco-kosten van een interface zijn omgekeerd evenredig met de bandbreedte van de
 koppel. Daarom duidt een hogere bandbreedte op lagere kosten. De gebruikte formule
 om de OSPF-kosten te berekenen is:
@@ -488,6 +524,7 @@ om de OSPF-kosten te berekenen is:
 
 ### 2.4.3 OSPF Accumulates Cost
 - de kost van een OSPF route is de geaccumuleerde waarde van 1 router naar het bestemmings netwerk
+- de loopback interface hebben standaard een kost van 1
 
 ### 2.4.4 Manually Set OSPF Cost Value
 - redenen om de cost value manueel in te stellen:
@@ -495,7 +532,7 @@ om de OSPF-kosten te berekenen is:
   - connectie's naar apparaten van een andere verkoper, die een andere formule gebruiken voor het berekenen van de OSPF kost
 
 ### 2.4.5 Test Failover to Backup Route
-- 
+- zie slides
 
 ### 2.4.6 Hello Pakcets Intervals
 - OSPFv2 Hello pakketten worden verstuurd naar het multicast adres 224.0.0.5 (alle OSPF routers) iedere 10 seconden. Dit is een default timer waarde op de multiacces en point-to-point netwerken
@@ -520,10 +557,22 @@ om de OSPF-kosten te berekenen is:
 ### 2.5.1 Propagate a Default Static Route in OSPFv2
 - om een Default route te propageren, moet de router als volgende geconfigueerd zijn:
   - een default static route, door volgende commando `ip route 0.0.0.0 0.0.0.0 <next-hop-address | exit-intf>`
-  - de `default-information originate`commando, dit stelt de router in als de brond van de default route informatie
+  - de `default-information originate`commando, dit stelt de router in als de bron van de default route informatie
 
 ## 2.6 Verify Single-Area OSPFv2
 ### 2.6.1 Verify OSPF Neighbors
+- commando's
+  - `show ip interface brief`
+  - `show ip route`
+  - `show ip ospf neighbor`
+  - `show ip protocols`
+  - `show ip ospf`
+  - `show ip ospf interface`
+- 2 routers zullen geen OSPFv2 adjacency vormen als het volgende gebeurt:
+  - wanneer de subnetmask niet matchen
+  - de OSPFv2 Hello en Dead timers matchen niet
+  - de OSPFv2 netwerk types matchen niet
+  - er is mist een OSPFv2 netwerk commando of deze is incorrect
 
 # Module 4: ACL Concepts
 ## 4.1 Purpose of ACLs
